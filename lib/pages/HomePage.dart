@@ -1,119 +1,127 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fooddeliverapp/helper/auth.dart';
+import 'package:fooddeliverapp/pages/BrowseRestaurants.dart';
+import 'package:fooddeliverapp/pages/LoginPage.dart';
+import '../firebase_options.dart';
 
-class ProfileScreen extends StatefulWidget {
+class HomePage extends StatelessWidget {
   @override
-  _ProfileScreenState createState() => _ProfileScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Food Delivery'),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+            child: Text(
+              'Categories',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              children: [
+                CategoryCard(
+                  categoryName: 'Italian',
+                  image: 'assets/pasta.jpg',
+                  onTap: () {
+                    // Navigate to Italian restaurants page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => BrowseRestaurantPage()),
+                    );
+                  },
+                ),
+                CategoryCard(
+                  categoryName: 'Fast Food',
+                  image: 'assets/burger.jpg',
+                  onTap: () {
+                    // Navigate to American restaurants page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => BrowseRestaurantPage()),
+                    );
+                  },
+                ),
+                CategoryCard(
+                  categoryName: 'Japanese',
+                  image: 'assets/sushi.jpg',
+                  onTap: () {
+                    // Navigate to Japanese restaurants page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => BrowseRestaurantPage()),
+                    );
+                  },
+                ),
+                CategoryCard(
+                  categoryName: 'Mexican',
+                  image: 'assets/ragingburrito.jpg',
+                  onTap: () {
+                    // Navigate to Japanese restaurants page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => BrowseRestaurantPage()),
+                    );
+                  },
+                ),
+                // Add more category cards here
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  final User? user = FirebaseAuth.instance.currentUser;
-  final _formKey = GlobalKey<FormState>();
-  String? _newPassword;
-  bool _showPasswordFields = false;
+class CategoryCard extends StatelessWidget {
+  final String categoryName;
+  final String image;
+  final VoidCallback onTap;
 
-  Future<void> changePassword() async {
-    try {
-      await FirebaseAuth.instance.currentUser?.updatePassword(_newPassword!);
-      debugPrint('Password changed successfully');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('You have changed your password successfully'),
-        ),
-      );
-    } catch (error) {
-      debugPrint('Failed to change password: $error');
-      // Show snackbar with error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to change password: $error'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
+  const CategoryCard({
+    required this.categoryName,
+    required this.image,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Form(
-        key: _formKey,
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 4.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'User Email: ${user?.email ?? "Unknown"}',
-              style: TextStyle(fontSize: 20),
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12.0)),
+              child: Image.asset(
+                image,
+                fit: BoxFit.cover,
+                height: 150.0,
+              ),
             ),
-            SizedBox(height: 20),
-            _showPasswordFields
-                ? Column(
-                    children: [
-                      TextFormField(
-                        obscureText: true,
-                        decoration:
-                            InputDecoration(labelText: 'Current Password'),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your current password';
-                          }
-                          // You may add additional validation logic here
-                          return null;
-                        },
-                        onChanged: (value) {},
-                      ),
-                      TextFormField(
-                        obscureText: true,
-                        decoration: InputDecoration(labelText: 'New Password'),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a new password';
-                          }
-                          // You may add additional validation logic here
-                          return null;
-                        },
-                        onChanged: (value) {
-                          _newPassword = value;
-                        },
-                      ),
-                      TextFormField(
-                        obscureText: true,
-                        decoration:
-                            InputDecoration(labelText: 'Confirm New Password'),
-                        validator: (value) {
-                          if (value != _newPassword) {
-                            return 'Passwords do not match';
-                          }
-                          return null;
-                        },
-                        onChanged: (value) {},
-                      ),
-                      SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            changePassword();
-                          }
-                        },
-                        child: Text('Change Password'),
-                      ),
-                    ],
-                  )
-                : ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _showPasswordFields = true;
-                      });
-                    },
-                    child: Text('Change Password'),
-                  ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-              child: Text('Logout'),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                categoryName,
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
